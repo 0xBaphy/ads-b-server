@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  dump1090:
+    container_name: dump1090
+    restart: unless-stopped
+    image: "jraviles/dump1090:latest"
+    ports:
+      - "8080:8080"
+    devices:
+      - /dev/dvb:/dev/dvb
+    privileged: true
+
+  adsbexchange:
+    container_name: adsbx
+    image: ghcr.io/sdr-enthusiasts/docker-adsbexchange:latest
+    restart: unless-stopped
+    links:
+      - "dump1090:decoder"
+    environment:
+      - TZ=${TZ}
+      - BEASTHOST=dump1090
+      - LAT=${LAT}
+      - LONG=${LONG}
+      - ALT=${ALT}
+      - SITENAME=${SITENAME}
+      - UUID=${UUID}
+    tmpfs:
+      - /run:rw,nosuid,nodev,exec,relatime,size=64M,uid=1000,gid=1000
